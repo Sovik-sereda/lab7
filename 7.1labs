@@ -1,0 +1,74 @@
+#include <iostream>
+#include <omanip>
+#include <cmath>
+#include <clocale>
+
+#include <fcntl.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#include <io.h>
+#endif
+using namespace std;
+
+const double PI = 3.14159265358979323846;
+
+double exactFunction(double x) {
+    double sum = 0.0;
+    for (int n = 1; n <= 1000; n++) {
+        sum += cos((2 * n - 1) * x) / pow(2 * n - 1, 2);
+    }
+    return sum;
+}
+
+// Функція для обчислення суми ряду з фіксованим n
+double seriesSumFixedN(double x, int n) {
+    double sum = 0.0;
+    for (int i = 1; i <= n; i++) {
+        sum += cos((2 * i - 1) * x) / pow(2 * i - 1, 2);
+    }
+    return sum;
+}
+
+// Функція для обчислення суми ряду з заданою точністю
+double seriesSumAccuracy(double x, double epsilon) {
+    double sum = 0.0;
+    int n = 1;
+    double term;
+    do {
+        term = cos((2 * n - 1) * x) / pow(2 * n - 1, 2);
+        sum += term;
+        n++;
+    } while (fabs(term) > epsilon);
+    return sum;
+}
+
+int main() {
+// Налаштування для підтримки української мови
+#if defined(_WIN32)
+SetConsoleCP(1251);
+SetConsoleOutputCP(1251);
+setlocale(LC_ALL, "Ukrainian_Ukraine.1251");
+#else
+setlocale(LC_ALL, "uk_UA.UTF-8");
+#endif
+
+const double a = PI / 5;
+const double b = PI;
+const int k = 5;
+const double h = (b - a) / (k - 1);
+const double epsilon = 0.0001;
+const int fixedN = 5;
+
+cout << "Обчислення функції S = Σ(cos(2n-1) x / (2n-1))" << endl;
+cout << setw(6) << "fixed" << setw(14) << "sumFixedN" << setw(26) << "sumAccuracy" << setw(15) << "exact" << setw(11) << "diff" << endl;
+
+for (int i = 0; i < k; i++) {
+    double x = a + i * h;
+    double sumFixedN = seriesSumFixedN(x, fixedN);
+    double sumAccuracy = seriesSumAccuracy(x, epsilon);
+    double exact = exactFunction(x);
+    double diff = fabs(sumAccuracy - exact);
+
+    cout << "|" << setw(9) << i << "|" << setw(9) << x << "|" << setw(14) << sumFixedN << "|" << setw(26) << sumAccuracy << "|" << setw(15) << exact << "|" << setw(11) << diff << "|" << endl;
+}
